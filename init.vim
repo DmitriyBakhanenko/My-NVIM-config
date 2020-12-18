@@ -3,7 +3,6 @@ call plug#begin('~/.vim/plugged')
 
 
 Plug 'chemzqm/vim-jsx-improve'
-Plug 'kjwon15/vim-transparent'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'scrooloose/nerdtree'
 "Plug 'tsony-tsonev/nerdtree-git-plugin'
@@ -18,13 +17,19 @@ Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
 Plug 'christoomey/vim-tmux-navigator'
 
 " themes
-Plug 'morhetz/gruvbox'
+"Plug 'morhetz/gruvbox'
+Plug 'gruvbox-community/gruvbox'
 Plug 'dikiaap/minimalist'
 Plug 'NLKNguyen/papercolor-theme'
 Plug 'kristijanhusak/vim-hybrid-material'
 
+" transparent background
+Plug 'kjwon15/vim-transparent'
+
 Plug 'HerringtonDarkholme/yats.vim' " TS Syntax
 
+" use the system clipboard for copy and paste
+set clipboard=unnamedplus
 
 " Initialize plugin system
 call plug#end()
@@ -90,6 +95,7 @@ noremap <silent> <expr> j (v:count == 0 ? 'gj' : 'j')
 noremap <silent> <expr> k (v:count == 0 ? 'gk' : 'k')
 
 set relativenumber
+:set nu rnu
 
 set smarttab
 set cindent
@@ -99,6 +105,7 @@ set shiftwidth=2
 set expandtab
 
 colorscheme gruvbox
+set background=dark
 
 " sync open file with NERDTree
 " " Check if NERDTree is open or active
