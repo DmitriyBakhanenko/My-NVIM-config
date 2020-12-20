@@ -1,7 +1,8 @@
 " Specify a directory for plugins
 call plug#begin('~/.vim/plugged')
 
-
+Plug 'junegunn/goyo.vim'
+Plug 'frazrepo/vim-rainbow' "color braces plugin
 Plug 'chemzqm/vim-jsx-improve'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'scrooloose/nerdtree'
@@ -13,26 +14,28 @@ Plug 'airblade/vim-gitgutter'
 Plug 'ctrlpvim/ctrlp.vim' " fuzzy find files
 Plug 'scrooloose/nerdcommenter'
 Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
-
 Plug 'christoomey/vim-tmux-navigator'
 
 " themes
-"Plug 'morhetz/gruvbox'
 Plug 'gruvbox-community/gruvbox'
 Plug 'dikiaap/minimalist'
 Plug 'NLKNguyen/papercolor-theme'
 Plug 'kristijanhusak/vim-hybrid-material'
 
-" transparent background
-Plug 'kjwon15/vim-transparent'
-
+Plug 'kjwon15/vim-transparent' " transparent background
 Plug 'HerringtonDarkholme/yats.vim' " TS Syntax
-
-" use the system clipboard for copy and paste
-set clipboard=unnamedplus
 
 " Initialize plugin system
 call plug#end()
+
+" move blocks
+xnoremap K :move '<-2<CR>gv-gv
+xnoremap J :move '>+1<CR>gv-gv
+
+set clipboard=unnamedplus " share vim clip and sys clip
+
+" color braces
+let g:rainbow_active = 1
 
 let g:jsx_improve_javascriptreact = 0
 let NERDTreeShowHidden=1
@@ -49,8 +52,9 @@ nnoremap <C-o> :call NERDComment(0,"toggle")<CR>
 vnoremap <C-o> :call NERDComment(0,"toggle")<CR>
 
 " escape parantasis
-:inoremap <C-l> <Esc>/[)}"'\]>]<CR>:nohl<CR>a
+:inoremap <C-j> <Esc>/[)}"'\]>]<CR>:nohl<CR>a
 :vnoremap _( <Esc>`>a)<Esc>`<i(<Esc>
+
 
 " open NERDTree automatically
 "autocmd StdinReadPre * let s:std_in=1
@@ -95,7 +99,7 @@ noremap <silent> <expr> j (v:count == 0 ? 'gj' : 'j')
 noremap <silent> <expr> k (v:count == 0 ? 'gk' : 'k')
 
 set relativenumber
-:set nu rnu
+set nu rnu
 
 set smarttab
 set cindent
@@ -152,6 +156,7 @@ inoremap <silent><expr> <TAB>
       \ <SID>check_back_space() ? "\<TAB>" :
       \ coc#refresh()
   \ 'coc-pairs',
+  \ 'coc-snippets',
   \ 'coc-tsserver',
   \ 'coc-eslint', 
   \ 'coc-prettier', 
@@ -254,3 +259,43 @@ command! -nargs=0 Format :call CocAction('format')
 " Use `:Fold` to fold current buffer
 command! -nargs=? Fold :call     CocAction('fold', <f-args>)
 nnoremap <silent> <space>p  :<C-u>CocListResume<CR>
+
+" {\n after curly braces open}
+inoremap <leader><Cr> <Cr><Cr><UP><tab><tab>
+
+" remove highlight
+nmap <C-i> :nohl<Cr>
+
+" GOYO setup
+
+let g:goyo_width=88
+let g:goyo_height=37
+
+nmap <leader>z :Goyo<Cr>
+
+function! s:goyo_enter()
+  set signcolumn=no
+  if executable('tmux') && strlen($TMUX)
+    silent !tmux set status off
+    silent !tmux list-panes -F '\#F' | grep -q Z || tmux resize-pane -Z
+  endif
+  set noshowmode
+  set noshowcmd
+  set scrolloff=999
+  " ...
+endfunction
+
+function! s:goyo_leave()
+  set signcolumn=yes
+  if executable('tmux') && strlen($TMUX)
+    silent !tmux set status on
+    silent !tmux list-panes -F '\#F' | grep -q Z && tmux resize-pane -Z
+  endif
+  set showmode
+  set showcmd
+  set scrolloff=5
+  " ...
+endfunction
+
+autocmd! User GoyoEnter nested call <SID>goyo_enter()
+autocmd! User GoyoLeave nested call <SID>goyo_leave()
