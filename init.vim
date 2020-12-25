@@ -266,9 +266,79 @@ inoremap <leader><Cr> <Cr><Cr><UP><tab><tab>
 
 " remove highlight
 nmap <C-i> :nohl<Cr>
+"
+" Colorize line numbers in insert and visual modes
+" ------------------------------------------------
+function! SetCursorLineNrColorInsert(mode)
+    " Insert mode: blue
+    if a:mode == "i"
+        highlight CursorLineNr ctermfg=4 guifg=#268bd2
+
+    " Replace mode: red
+    elseif a:mode == "r"
+        highlight CursorLineNr ctermfg=1 guifg=#dc322f
+
+    endif
+endfunction
+
+
+function! SetCursorLineNrColorVisual()
+    set updatetime=0
+
+    " Visual mode: orange
+    highlight CursorLineNr ctermfg=9 guifg=#cb4b16
+endfunction
+
+
+function! ResetCursorLineNrColor()
+    set updatetime=4000
+    highlight CursorLineNr ctermfg=3* guifg=#073642
+endfunction
+
+
+vnoremap <silent> <expr> <SID>SetCursorLineNrColorVisual SetCursorLineNrColorVisual()
+nnoremap <silent> <script> v v<SID>SetCursorLineNrColorVisual
+nnoremap <silent> <script> V V<SID>SetCursorLineNrColorVisual
+nnoremap <silent> <script> <C-v> <C-v><SID>SetCursorLineNrColorVisual
+
+
+augroup CursorLineNrColorSwap
+    autocmd!
+    autocmd InsertEnter * call SetCursorLineNrColorInsert(v:insertmode)
+    autocmd InsertLeave * call ResetCursorLineNrColor()
+    autocmd CursorHold * call ResetCursorLineNrColor()
+augroup END
+
+" status line color func
+"function! InsertStatuslineColor(mode)
+  "if a:mode == 'i'
+    "hi statusline guibg=DarkGreen ctermfg=6 guifg=Black ctermbg=0
+  "elseif a:mode == 'r'
+    "hi statusline guibg=DarkYellow ctermfg=3 guifg=Black ctermbg=0
+  "elseif a:mode == 'v'
+    "hi statusline guibg=DarkGreen ctermfg=2 guifg=Black ctermbg=0
+  "else
+    "hi statusline guibg=DarkRed ctermfg=4 guifg=Black ctermbg=0
+  "endif
+"endfunction
+
+"au InsertEnter * call InsertStatuslineColor(v:insertmode)
+"au InsertLeave * hi statusline ctermfg=0*  ctermbg=2
+"au UIEnter * call InsertStatuslineColor(v:hlsearch)
+"au UILeave * hi statusline guibg=DarkGrey ctermfg=8 guifg=Grey ctermbg=0
+
+" default the statusline to green when entering Vim
+hi statusline guibg='#191919' ctermfg=0* guifg='#191919' ctermbg=2
+
+" Formats the statusline
+set statusline=%f                           " file name
+set statusline+=%m      "modified flag
+set statusline+=%r      "read only flag
+" right side
+set statusline+=\ %=                        " align left
+set statusline+=%l/%L[%p%%]            " line X of Y [percent of file]
 
 " GOYO setup
-
 let g:goyo_width=88
 let g:goyo_height=37
 
