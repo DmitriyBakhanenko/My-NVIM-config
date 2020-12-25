@@ -2,7 +2,7 @@
 call plug#begin('~/.vim/plugged')
 
 Plug 'junegunn/goyo.vim'
-Plug 'frazrepo/vim-rainbow' "color braces plugin
+"Plug 'frazrepo/vim-rainbow' "color braces plugin
 Plug 'chemzqm/vim-jsx-improve'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'scrooloose/nerdtree'
@@ -18,15 +18,16 @@ Plug 'christoomey/vim-tmux-navigator'
 
 " themes
 Plug 'gruvbox-community/gruvbox'
-Plug 'dikiaap/minimalist'
-Plug 'NLKNguyen/papercolor-theme'
-Plug 'kristijanhusak/vim-hybrid-material'
 
 Plug 'kjwon15/vim-transparent' " transparent background
 Plug 'HerringtonDarkholme/yats.vim' " TS Syntax
+"Plug 'mxw/vim-jsx'
 
 " Initialize plugin system
 call plug#end()
+
+" for mxv/vim-jsx setup only jsx files
+"let g:jsx_ext_required = 1
 
 " move blocks
 xnoremap K :move '<-2<CR>gv-gv
