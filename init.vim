@@ -1,6 +1,11 @@
 " Specify a directory for plugins
 call plug#begin('~/.vim/plugged')
 
+" fuzzy searcher
+"Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+"Plug 'junegunn/fzf.vim'
+Plug 'airblade/vim-rooter'
+" zen mode : love !!!
 Plug 'junegunn/goyo.vim'
 "Plug 'frazrepo/vim-rainbow' "color braces plugin
 Plug 'chemzqm/vim-jsx-improve'
@@ -15,6 +20,7 @@ Plug 'ctrlpvim/ctrlp.vim' " fuzzy find files
 Plug 'scrooloose/nerdcommenter'
 Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
 Plug 'christoomey/vim-tmux-navigator'
+Plug 'mileszs/ack.vim'
 
 " themes
 Plug 'gruvbox-community/gruvbox'
@@ -22,12 +28,54 @@ Plug 'gruvbox-community/gruvbox'
 Plug 'kjwon15/vim-transparent' " transparent background
 Plug 'HerringtonDarkholme/yats.vim' " TS Syntax
 "Plug 'mxw/vim-jsx'
-
+"
 " Initialize plugin system
 call plug#end()
 
+" Customize fzf colors to match your color scheme
+let g:fzf_colors =
+\ { 'fg':      ['fg', 'Normal'],
+  \ 'bg':      ['bg', 'Normal'],
+  \ 'hl':      ['fg', 'Comment'],
+  \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
+  \ 'bg+':     ['bg', 'CursorLine', 'CursorColumn'],
+  \ 'hl+':     ['fg', 'Statement'],
+  \ 'info':    ['fg', 'PreProc'],
+  \ 'border':  ['fg', 'Ignore'],
+  \ 'prompt':  ['fg', 'Conditional'],
+  \ 'pointer': ['fg', 'Exception'],
+  \ 'marker':  ['fg', 'Keyword'],
+  \ 'spinner': ['fg', 'Label'],
+  \ 'header':  ['fg', 'Comment'] }
+
+"Get Files
+command! -bang -nargs=? -complete=dir Files
+    \ call fzf#vim#files(<q-args>, fzf#vim#with_preview({'options': ['--layout=reverse', '--info=inline']}), <bang>0)
+
+nmap <C-e> :Rg<Cr>
+nmap <C-s> :w<Cr>
+nmap <D-s> :w<Cr>
+
+" Get text in files with Rg
+command! -bang -nargs=* Rg
+  \ call fzf#vim#grep(
+  \   'rg --column --line-number --no-heading --color=always --smart-case '.shellescape(<q-args>), 1,
+  \   fzf#vim#with_preview(), <bang>0)
+
+" Ripgrep advanced
+function! RipgrepFzf(query, fullscreen)
+  let command_fmt = 'rg --column --line-number --no-heading --color=always --smart-case %s || true'
+  let initial_command = printf(command_fmt, shellescape(a:query))
+  let reload_command = printf(command_fmt, '{q}')
+  let spec = {'options': ['--phony', '--query', a:query, '--bind', 'change:reload:'.reload_command]}
+  call fzf#vim#grep(initial_command, 1, fzf#vim#with_preview(spec), a:fullscreen)
+endfunction
+
+command! -nargs=* -bang RG call RipgrepFzf(<q-args>, <bang>0)
 " for mxv/vim-jsx setup only jsx files
 "let g:jsx_ext_required = 1
+let g:fzf_layout = {'up':'100%', 'window': { 'width': 1.0, 'height': 1.0,'yoffset':0.5,'xoffset': 0.5, 'highlight': 'Todo', 'border': 'sharp' } }
+"let g:fzf_preview_window = ['up:80%:hidden', 'ctrl-x']
 
 " move blocks
 xnoremap K :move '<-2<CR>gv-gv
@@ -36,7 +84,19 @@ xnoremap J :move '>+1<CR>gv-gv
 set clipboard=unnamedplus " share vim clip and sys clip
 
 " color braces
-let g:rainbow_active = 1
+"let g:rainbow_active = 1
+
+ "color braces
+"let g:rainbow_load_separately = [
+    "\ [ '*' , [['(', ')'], ['\[', '\]'], ['{', '}']] ],
+    "\ [ '*.tex' , [['(', ')'], ['\[', '\]']] ],
+    "\ [ '*.cpp' , [['(', ')'], ['\[', '\]'], ['{', '}']] ],
+    "\ [ '*.{html,htm}' , [['(', ')'], ['\[', '\]'], ['{', '}'], ['<\a[^>]*>', '</[^>]*>']] ],
+    "\ ]
+
+" color braces
+"let g:rainbow_guifgs = ['RoyalBlue3', 'DarkOrange3', 'DarkOrchid3', 'FireBrick']
+"let g:rainbow_ctermfgs = ['lightblue', 'lightgreen', 'yellow', 'red', 'magenta']
 
 let g:jsx_improve_javascriptreact = 0
 let NERDTreeShowHidden=1
@@ -49,12 +109,14 @@ inoremap jk <ESC>
 nmap <C-n> :NERDTreeToggle<CR>
 
 " nerd comment keymap
-nnoremap <C-o> :call NERDComment(0,"toggle")<CR>
-vnoremap <C-o> :call NERDComment(0,"toggle")<CR>
+"nnoremap <C-o> :call NERDComment(0,"toggle")<CR>
+"vnoremap <C-o> :call NERDComment(0,"toggle")<CR>
 
+nnoremap <C-o> :call nerdcommenter#Comment(0,"toggle")<CR>
+vnoremap <C-o> :call nerdcommenter#Comment(0,"toggle")<CR>
 " escape parantasis
-:inoremap <C-j> <Esc>/[)}"'\]>]<CR>:nohl<CR>a
-:vnoremap _( <Esc>`>a)<Esc>`<i(<Esc>
+:nnoremap <C-i> :nohl<CR><C-i>
+:vnoremap <C-;> _( <Esc>`>a)<Esc>`<i(<Esc>
 
 
 " open NERDTree automatically
@@ -66,19 +128,8 @@ autocmd FileType python map <buffer> <F9> :w<CR>:exec '!python3' shellescape(@%,
 autocmd FileType python imap <buffer> <F9> <esc>:w<CR>:exec '!python3' shellescape(@%, 1)<CR>
 
 let g:NERDTreeGitStatusWithFlags = 1
-"let g:WebDevIconsUnicodeDecorateFolderNodes = 1
-"let g:NERDTreeGitStatusNodeColorization = 1
-"let g:NERDTreeColorMapCustom = {
-    "\ "Staged"    : "#0ee375",  
-    "\ "Modified"  : "#d9bf91",  
-    "\ "Renamed"   : "#51C9FC",  
-    "\ "Untracked" : "#FCE77C",  
-    "\ "Unmerged"  : "#FC51E6",  
-    "\ "Dirty"     : "#FFBD61",  
-    "\ "Clean"     : "#87939A",   
-    "\ "Ignored"   : "#808080"   
-    "\ }                         
-
+let g:WebDevIconsUnicodeDecorateFolderNodes = 1
+let g:NERDTreeGitStatusNodeColorization = 1
 
 let g:NERDTreeIgnore = ['^node_modules$']
 
@@ -230,7 +281,7 @@ nmap <leader>f  <Plug>(coc-format-selected)
 augroup mygroup
   autocmd!
   " Setup formatexpr specified filetype(s).
-  autocmd FileType typescript,json setl formatexpr=CocAction('formatSelected')
+  autocmd FileType typescript,json,python setl formatexpr=CocAction('formatSelected')
   " Update signature help on jump placeholder
   autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
 augroup end
@@ -264,8 +315,6 @@ nnoremap <silent> <space>p  :<C-u>CocListResume<CR>
 " {\n after curly braces open}
 inoremap <leader><Cr> <Cr><Cr><UP><tab><tab>
 
-" remove highlight
-nmap <C-i> :nohl<Cr>
 "
 " Colorize line numbers in insert and visual modes
 " ------------------------------------------------
@@ -282,32 +331,32 @@ function! SetCursorLineNrColorInsert(mode)
 endfunction
 
 
-function! SetCursorLineNrColorVisual()
-    set updatetime=0
+"function! SetCursorLineNrColorVisual()
+    "set updatetime=0
 
-    " Visual mode: orange
-    highlight CursorLineNr ctermfg=9 guifg=#cb4b16
-endfunction
-
-
-function! ResetCursorLineNrColor()
-    set updatetime=4000
-    highlight CursorLineNr ctermfg=3* guifg=#073642
-endfunction
+    "" Visual mode: orange
+    "highlight CursorLineNr ctermfg=9 guifg=#cb4b16
+"endfunction
 
 
-vnoremap <silent> <expr> <SID>SetCursorLineNrColorVisual SetCursorLineNrColorVisual()
-nnoremap <silent> <script> v v<SID>SetCursorLineNrColorVisual
-nnoremap <silent> <script> V V<SID>SetCursorLineNrColorVisual
+"function! ResetCursorLineNrColor()
+    "set updatetime=4000
+    "highlight CursorLineNr ctermfg=3* guifg=#073642
+"endfunction
+
+
+"vnoremap <silent> <expr> <SID>SetCursorLineNrColorVisual SetCursorLineNrColorVisual()
+"nnoremap <silent> <script> v v<SID>SetCursorLineNrColorVisual
+"nnoremap <silent> <script> V V<SID>SetCursorLineNrColorVisual
 nnoremap <silent> <script> <C-v> <C-v><SID>SetCursorLineNrColorVisual
 
 
-augroup CursorLineNrColorSwap
-    autocmd!
-    autocmd InsertEnter * call SetCursorLineNrColorInsert(v:insertmode)
-    autocmd InsertLeave * call ResetCursorLineNrColor()
-    autocmd CursorHold * call ResetCursorLineNrColor()
-augroup END
+"augroup CursorLineNrColorSwap
+    "autocmd!
+    "autocmd InsertEnter * call SetCursorLineNrColorInsert(v:insertmode)
+    "autocmd InsertLeave * call ResetCursorLineNrColor()
+    "autocmd CursorHold * call ResetCursorLineNrColor()
+"augroup END
 
 " status line color func
 "function! InsertStatuslineColor(mode)
@@ -328,18 +377,18 @@ augroup END
 "au UILeave * hi statusline guibg=DarkGrey ctermfg=8 guifg=Grey ctermbg=0
 
 " default the statusline to green when entering Vim
-hi statusline guibg='#191919' ctermfg=0* guifg='#191919' ctermbg=2
+hi StatusLine ctermfg=0 cterm=Bold ctermbg=NONE
 
 " Formats the statusline
-set statusline=%f                           " file name
 set statusline+=%m      "modified flag
 set statusline+=%r      "read only flag
 " right side
 set statusline+=\ %=                        " align left
-set statusline+=%l/%L[%p%%]            " line X of Y [percent of file]
+set statusline+=%t\                           " file name
+set statusline+=%l/%L\ [%p%%]            " line X of Y [percent of file]
 
 " GOYO setup
-let g:goyo_width=88
+let g:goyo_width=90
 let g:goyo_height=37
 
 nmap <leader>z :Goyo<Cr>
@@ -366,6 +415,7 @@ function! s:goyo_leave()
   set showcmd
   set scrolloff=5
   " ...
+hi StatusLine ctermfg=10 cterm=Bold ctermbg=NONE
 endfunction
 
 autocmd! User GoyoEnter nested call <SID>goyo_enter()

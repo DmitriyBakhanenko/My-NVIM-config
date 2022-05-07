@@ -1,7 +1,9 @@
 {
   "coc.preferences.formatOnSaveFiletypes": [
+    "html",
     "css",
-    "python",
+    "scss",
+    "sass",
     "javascript",
     "javascriptreact",
     "javascript.jsx",
@@ -11,6 +13,13 @@
     "json",
     "graphql"
   ],
+
   "prettier.semi": true,
-  "prettier.singleQuote": true
+  "prettier.singleQuote": true,
+
+  "python.linting.enabled": true,
+  "python.linting.pylintEnabled": true,
+  "python.formatting.provider": "autopep8",
+
+  "snippets.ultisnips.directories": ["UltiSnips", "~/.config/nvim/utils/snips"]
 }
